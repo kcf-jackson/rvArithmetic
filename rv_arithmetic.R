@@ -1,5 +1,18 @@
 library(magrittr)
 
+# Interpreter
+repl <- function() {
+  env <- new.env()
+  input <- ""
+  while (input != "exit()") {
+    input <- readline("rv_arithmetic > ")  
+    if (input == "exit()") break
+    run_script(input, env)
+  }
+  invisible(env)
+}
+
+
 run_script <- function(str0, env) {
   require(purrr)
   if (missing(env)) env <- new.env()
@@ -73,3 +86,5 @@ run_script(
   find sin(x-y)
   "
 )
+
+repl()
