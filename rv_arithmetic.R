@@ -1,3 +1,4 @@
+rm(list = ls())
 library(magrittr)
 
 # Interpreter
@@ -12,17 +13,13 @@ repl <- function() {
   invisible(env)
 }
 
-
-run_script <- function(str0, env) {
-  require(purrr)
-  if (missing(env)) env <- new.env()
-  code_lines <- str0 %>% strsplit(";") %>% unlist() %>% map_chr(clean_up)
+run_script <- function(str0, env = new.env()) {
+  code_lines <- str0 %>% strsplit(";") %>% unlist() %>% purrr::map_chr(clean_up)
   for (cmd in code_lines) {
     dispatch_eval(cmd, env)
   }
   invisible(env)
 }
-
 
 dispatch_eval <- function(cmd, env) {
   tokens <- cmd %>% strsplit(" ") %>% unlist()
@@ -91,12 +88,27 @@ clean_up <- function(str0) {
 }
 
 
-# Unit test
+# Examples
+run_script("let x be normal(0,1); let y be poisson(5); find x + y")
+
 run_script(
   "let x be normal(0,1); 
-  let y be gamma(3,2); 
-  find sin(x-y)
-  "
+  let y be poisson(5); 
+  let z be normal(-10, 1); 
+  find sin(x - y) * z"
 )
+
+run_script(
+  "let theta be gamma(3, 2); 
+  let y be poisson(3 + 2 * theta);
+  find y"
+)
+
+run_script(
+  "let p be uniform(0.6, 0.8);
+  let y be binomial(1, p);
+  find y"
+)
+
 
 repl()
