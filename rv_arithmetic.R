@@ -1,7 +1,24 @@
+dispatch_eval <- function(cmd, env = globalenv()) {
+  tokens <- cmd %>% strsplit(" ") %>% unlist()
+  keyword <- tokens[1]
+  command <- paste(tokens[-1], collapse = ' ')
+  
+  if (tokens[1] == "let") {
+    eval(parse(text = define(command)), env)
+  } else if (tokens[1] == "find") {
+    eval(parse(text = result(command)), env)
+  } else {
+    eval(parse(text = cmd), env)  # usual R command
+  }
+  
+  invisible(env)
+}
+
+
 # Compiler
 synthetic_syntax <- function() {
   list(
-    "is"= "<-",
+    "be"= "<-",
     "normal[(]" = "rnorm(5000,",
     "poisson[(]" = "rpois(5000,",
     "gamma[(]" = "rgamma(5000,",
@@ -26,5 +43,5 @@ result <- function(str0) {
 }
 
 # Unit test
-define("x is normal(0,1)")
-result("x")
+dispatch_eval("let x be normal(0,1)")
+dispatch_eval("find x")
