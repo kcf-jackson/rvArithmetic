@@ -28,13 +28,25 @@ dispatch_eval <- function(cmd, env) {
   tokens <- cmd %>% strsplit(" ") %>% unlist()
   keyword <- tokens[1]
   command <- paste(tokens[-1], collapse = ' ')
+  catch_err <- . %>% tryCatch(error = identity, warning = identity)
+  has_err <- . %>% {any(c('error', 'warning') %in% class(.))}
+  report_err <- function(res, show_value = T) {
+    if (has_err(res)) {
+      print(res$message)
+    } else if (show_value) {
+      print(res)
+    }
+  }
+  eval_env <- function(cmd) {
+    catch_err(eval(parse(text = cmd), env))
+  }
   
   if (tokens[1] == "let") {
-    eval(parse(text = define(command)), env)
+    define(command) %>% eval_env() %>% report_err(F)
   } else if (tokens[1] == "find") {
-    eval(parse(text = result(command)), env)
+    result(command) %>% eval_env() %>% report_err(F)
   } else {
-    eval(parse(text = cmd), env)  # usual R command
+    cmd %>% eval_env() %>% report_err(T)
   }
   
   invisible(env)
