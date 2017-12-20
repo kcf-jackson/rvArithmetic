@@ -3,14 +3,20 @@ synthetic_syntax <- function() {
   list(
     "is"= "<-",
     "normal[(]" = "rnorm(5000,",
-    "poisson[(]" = "rpois(5000,"
+    "poisson[(]" = "rpois(5000,",
+    "gamma[(]" = "rgamma(5000,",
+    "chi-square[(]" = "rchisq(5000,",
+    "uniform[(]" = "runif(5000,",
+    "binomial[(]" = "rbinom(5000,"
   )
 }
 
 define <- function(str0) {
   syntax_list <- synthetic_syntax()
   for (i in seq_along(syntax_list)) {
-    str0 <- gsub(names(syntax_list)[i], syntax_list[i], str0)
+    find <- names(syntax_list)[i]
+    replace <- syntax_list[i]
+    str0 <- gsub(find, replace, str0)
   }
   str0
 }
