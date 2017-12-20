@@ -1,4 +1,15 @@
-dispatch_eval <- function(cmd, env = globalenv()) {
+run_script <- function(str0, env) {
+  require(purrr)
+  if (missing(env)) env <- new.env()
+  code_lines <- str0 %>% strsplit(";") %>% unlist()
+  for (cmd in code_lines) {
+    dispatch_eval(cmd, env)
+  }
+  invisible(env)
+}
+
+
+dispatch_eval <- function(cmd, env) {
   tokens <- cmd %>% strsplit(" ") %>% unlist()
   keyword <- tokens[1]
   command <- paste(tokens[-1], collapse = ' ')
@@ -43,5 +54,4 @@ result <- function(str0) {
 }
 
 # Unit test
-dispatch_eval("let x be normal(0,1)")
-dispatch_eval("find x")
+run_script("let x be normal(0,1);let y be gamma(3,2);find x-y")
