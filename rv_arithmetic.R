@@ -15,5 +15,10 @@ define <- function(str0) {
   str0
 }
 
+result <- function(str0) { 
+  sprintf("hist(%s, 30, prob = T)", str0)
+}
+
 # Unit test
 define("x is normal(0,1)")
+result("x")
