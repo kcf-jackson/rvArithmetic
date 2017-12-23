@@ -14,7 +14,7 @@ repl <- function() {
 }
 
 run_script <- function(str0, env = new.env()) {
-  code_lines <- str0 %>% strsplit(";") %>% unlist() %>% purrr::map_chr(clean_up)
+  code_lines <- str0 %>% codesplit()
   for (cmd in code_lines) {
     dispatch_eval(cmd, env)
   }
@@ -49,17 +49,45 @@ dispatch_eval <- function(cmd, env) {
   invisible(env)
 }
 
+codesplit <- function(str0) {
+  res <- c()
+  buffer <- NULL
+  open <- F
+  codelines <- str0 %>% strsplit(";") %>% unlist()
+  for (i in 1:length(codelines)) {
+    line <- codelines[i]
+    contain_open <- grepl("[{]", line)
+    contain_close <- grepl("[}]", line)
+    if (contain_open) open <- T
+    
+    if (open) {
+      buffer <- c(buffer, line)
+    } else {
+      res <- c(res, line)
+    }
+    
+    if (contain_close) {
+      open <- F
+      res <- c(res, paste(buffer, collapse = ';'))
+      buffer <- NULL
+    }
+  }
+  res %>% purrr::map_chr(clean_up)
+}
+
 
 # Compiler
 synthetic_syntax <- function() {
   list(
-    "be"= "<-",
+    "let" = "",
+    "be" = "<-",
     "normal[(]" = "rnorm(5000,",
     "poisson[(]" = "rpois(5000,",
     "gamma[(]" = "rgamma(5000,",
     "chi-square[(]" = "rchisq(5000,",
     "uniform[(]" = "runif(5000,",
-    "binomial[(]" = "rbinom(5000,"
+    "binomial[(]" = "rbinom(5000,",
+    "model" = "function"
   )
 }
 
@@ -110,5 +138,12 @@ run_script(
   find y"
 )
 
+run_script(
+  "let flip be model(p) {
+    let y be binomial(1, p);
+    return(y);
+  };
+  find flip(0.4)"
+)
 
 repl()
