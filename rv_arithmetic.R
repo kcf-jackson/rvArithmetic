@@ -115,6 +115,14 @@ clean_up <- function(str0) {
   str0 %>% stringr::str_trim()
 }
 
+normalise <- function(vec0) {vec0 / sum(vec0)}
+
+l2_norm <- function(x, y) {sum((x - y)^2)}
+
+metric <- function(x, y, summary_fun, distance_fun = l2_norm) {
+  summary_fun %>% purrr::map_dbl(~distance_fun(.x(x), .x(y))) %>% sum()
+}
+
 
 # Examples
 run_script("let x be normal(0,1); let y be poisson(5); find x + y")
@@ -146,4 +154,34 @@ run_script(
   find flip(0.4)"
 )
 
-repl()
+# repl()
+
+abc <- function(data0, fun, epsilon = 1e-6, iter = 1000, 
+                summary_fun = c(mean, var), distance_fun = l2_norm) {
+  eval_fun <- . %>% { do.call(fun, as.list(.)) }
+  perf_fun <- function(x, y) { metric(x, y, summary_fun, distance_fun) }
+  has_warning_or_error <- function(x) {
+    any(c('warning', 'error') %in% class(x))
+  }
+  param_dim <- length(formalArgs(fun))
+  
+  count <- 0
+  p <- runif(param_dim)
+  current_distance <- perf_fun(eval_fun(p), data0)
+  while ((current_distance > epsilon) && (count < iter)) {
+    count <- count + 1
+    new_p <- p + rnorm(param_dim, sd = 0.1)
+    new_distance <- tryCatch(
+      perf_fun(eval_fun(new_p), data0),
+      error = identity, warning = identity
+    )
+    if (!has_warning_or_error(new_distance)) {
+      if (new_distance < current_distance) {
+        p <- new_p
+        current_distance <- new_distance
+        # cat("Improved!", p, current_distance, "\n")
+      }
+    }
+  }
+  list(param = p, distance_from_data = current_distance, iter = count)
+}
