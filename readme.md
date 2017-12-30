@@ -10,4 +10,4 @@ devtools::install_github("kcf-jackson/rvArithmetic")
 
 ### Examples
 
-See [vignettes](https://github.com/kcf-jackson/rvArithmetic/tree/master/vignettes) for usage.
+See [vignettes](https://cdn.rawgit.com/kcf-jackson/rvArithmetic/b024f25b/vignettes/example.html) for usage.
