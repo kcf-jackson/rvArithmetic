@@ -1,0 +1,73 @@
+---
+title: "Random Variable Arithmetic"
+author: "Jackson Kwok"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Remarkably, this package is only ~150 lines long, and it can do arithmetic of random variables, build regression and hierarchical models, and perform statistical inference.
+```{r}
+library(rvArithmetic)
+library(magrittr)
+```
+
+All of the following can be run in a REPL with `repl()`. (`repl()` also accepts R commands, but not multi-line ones; type `exit()` to leave the REPL session.)
+
+## Simple arithmetic
+```{r}
+run_script("let x be normal(0,1); let y be poisson(5); find x + y")
+
+run_script(
+  "let x be normal(0,1);
+  let y be poisson(5);
+  let z be normal(-10, 1);
+  find sin(x - y) * z"
+)
+```
+
+## Hierarchical models
+```{r}
+run_script(
+  "let theta be gamma(3, 2);
+  let y be poisson(3 + 2 * theta);
+  find y"
+)
+
+run_script(
+  "let p be uniform(0.6, 0.8);
+  let y be binomial(1, p);
+  find y"
+)
+```
+
+## Inference
+```{r}
+run_script(
+  "let data0 be binomial(1, 0.7);
+  let coin be model(p) {
+    binomial(1, p);
+  };
+  infer coin from data0;"
+)
+```
+
+```{r}
+run_script(
+  "let data1 be gamma(5, 2);
+  let m0 be model(alpha, beta) {
+    gamma(alpha, beta);
+  };
+  infer m0 from data1;"
+)
+```
